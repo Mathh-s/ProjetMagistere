@@ -1,5 +1,8 @@
 
 
+
+
+
 def classFactice(start):                    # entree de dim N
     def __init__(self):
         self.start = start
