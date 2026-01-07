@@ -11,42 +11,35 @@ def reluderiv(x):
 
 class reseauFactice :
 
-    def __init__(self, start, valeurpoids, biais, nb_couche, nb_neuronnesparcouche, excepted):
+    def __init__(self, start, valeurpoids, nb_couche, nb_neuronnesparcouche):
         self.nb_couche = nb_couche
         self.nb_neuronnesparcouche = nb_neuronnesparcouche
-        self.entree = start
-        self.excepted = excepted
-        self.biais = np.full((1,nb_couche), 1)
+        self.biais = []
         self.vectPoids = []
+        self.entree = start.reshape(1, -1)
         for l in range(nb_couche - 1):
             nbentree = nb_neuronnesparcouche[l]
             nbsortie = nb_neuronnesparcouche[l + 1]
             poids = np.full((nbentree, nbsortie), valeurpoids, dtype = float)
             self.vectPoids.append(poids)
             self.biais.append(np.ones((1, nbsortie), dtype=float))
-        self.avant = [] #avant RELU
+        self.avant = [] # avant RELU
         self.apres = [] # apres RELU
 
 
 
-    def forward(self):
-        a = self.entree
+    def forward(self, x):
+        if x.ndim == 1:
+            x = x.reshape(1, -1)
         self.avant = []
-        self.apres = [a]
+        a = x
+        self.apres = [x]
         for i in range(len(self.vectPoids)):
-            poids = self.vectPoids[i]
-            b = self.biais[i]
-            z = np.dot(a, poids) + b
+            z = np.dot(a, self.vectPoids[i]) + self.biais[i]
             self.avant.append(z)
             a = relu(z)
             self.apres.append(a)
         return a
-
-
-    def erreur(self):
-        if self.sortie != self.excepted:
-            return 0
-        return 1
 
 
     def backward(self, y):  # sortie du neurone
@@ -62,7 +55,30 @@ class reseauFactice :
             self.biais[i] -= changebiais*0.01
 
 
+def entrainer(reseau, xtrain, ytrain, nb=100):
+    for num in range(nb):
+        erreurtot = 0
+        for i in range(len(xtrain)):
+            x = xtrain[i]
+            y = ytrain[i]
+            sortie = reseau.forward(x)
 
+            erreurtot += np.mean((sortie - y) ** 2)
+            reseau.backward(y)
+
+        if num % 10 == 0:
+            print(f"Nombre {num}: Erreur moyenne : {erreurtot / len(xtrain):.5f}")
+
+
+# 1. Données d'entraînement
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=float)
+Y = np.array([[0], [1], [1], [0]], dtype=float)
+
+# 2. Création d'un réseau (2 entrées, 4 neurones cachés, 1 sortie)
+monreseau = reseauFactice(X[0], 0.5, 3, [2, 4, 1])
+
+# 3. Entraînement
+entrainer(monreseau, X, Y, nb=500)
 
 """
 
@@ -76,7 +92,7 @@ reseau = reseauFactice(start, valeur_poids, nb_couche, nb_neuronnes)
 
 sortie = reseau.forward()
 print(sortie)
-"""
+
 
 
 
@@ -89,7 +105,8 @@ reseau = reseauFactice(start, valeur_poids, nb_couche, nb_neuronnes)
 
 y_attendu = np.array([[0., 1.]])
 
-for i in range(10):
-    sortie = reseau.forward()
+for i in range(100):
+    sortie = reseau.forward(start)
     reseau.backward(y_attendu)
-    print(f"it {i} -> sortie :", sortie)
+    print(f"itération {i} -> sortie :", sortie)
+"""
