@@ -20,7 +20,7 @@ class reseauFactice :
         for l in range(nb_couche - 1):
             nbentree = nb_neuronnesparcouche[l]
             nbsortie = nb_neuronnesparcouche[l + 1]
-            poids = np.full((nbentree, nbsortie), valeurpoids, dtype = float)
+            poids = np.random.randn(nbentree, nbsortie) * 0.1
             self.vectPoids.append(poids)
             self.biais.append(np.ones((1, nbsortie), dtype=float))
         self.avant = [] # avant RELU
@@ -55,7 +55,7 @@ class reseauFactice :
             self.biais[i] -= changebiais*0.01
 
 
-def entrainer(reseau, xtrain, ytrain, nb=100):
+def entrainer(reseau, xtrain, ytrain, nb=2):
     for num in range(nb):
         erreurtot = 0
         for i in range(len(xtrain)):
@@ -70,15 +70,6 @@ def entrainer(reseau, xtrain, ytrain, nb=100):
             print(f"Nombre {num}: Erreur moyenne : {erreurtot / len(xtrain):.5f}")
 
 
-# 1. Données d'entraînement
-X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=float)
-Y = np.array([[0], [1], [1], [0]], dtype=float)
-
-# 2. Création d'un réseau (2 entrées, 4 neurones cachés, 1 sortie)
-monreseau = reseauFactice(X[0], 0.5, 3, [2, 4, 1])
-
-# 3. Entraînement
-entrainer(monreseau, X, Y, nb=500)
 
 """
 
